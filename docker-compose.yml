@@ -8,12 +8,8 @@ services:
     depends_on:
       - mysql
     environment:
-      ConnectionStrings__DefaultConnection: >
-        Server=mysql;
-        Port=3306;
-        Database=apidb;
-        User=root;
-        Password=rootpassword;
+      # El Server=mysql apunta al servicio de abajo
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=apidb;User=root;Password=rootpassword;"
 
   mysql:
     image: mysql:8.0
@@ -26,7 +22,6 @@ services:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql-init:/docker-entrypoint-initdb.d
 
 volumes:
   mysql_data:
