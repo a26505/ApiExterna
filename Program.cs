@@ -5,69 +5,54 @@ using Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. CONFIGURACIÓN DE CONTROLADORES Y SWAGGER ---
+// Configuración básica
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// --- 2. REGISTRO DE REPOSITORIOS (Interfaces + HttpClient) ---
-// Registramos la interfaz y la clase, configurando la URL de la API externa
+// --- HTTP CLIENTS (Consumo de API Externa) ---
 builder.Services.AddHttpClient<IUsersRepository, UsersRepository>(c =>
     c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/"));
 
 builder.Services.AddHttpClient<ITasksRepository, TasksRepository>(c =>
     c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/"));
 
-// --- 3. REGISTRO DE SERVICIOS (Inversión de Dependencias) ---
-// Ahora los controladores pedirán la Interfaz y recibirán estas clases
+// --- INYECCIÓN DE DEPENDENCIAS ---
 builder.Services.AddScoped<IUsersService, UserService>();
 builder.Services.AddScoped<ITasksService, TasksService>();
 builder.Services.AddScoped<ISummaryService, SummaryService>();
 
-// --- 4. CONFIGURACIÓN DE BASE DE DATOS (MySQL Pomelo) ---
+// --- BASE DE DATOS MYSQL ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 builder.Services.AddDbContext<ApiDbContext>(options =>
-    options.UseMySql(
-        connectionString, 
-        new MySqlServerVersion(new Version(8, 0, 30)) // Versión fija para evitar el error de AutoDetect
-    ));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 30))));
 
 var app = builder.Build();
 
-// --- 5. MIDDLEWARE ---
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 app.MapControllers();
 
-// --- 6. INICIALIZACIÓN ROBUSTA (Solución al Timeout de MySQL) ---
-// Intentamos conectar a la DB varias veces antes de que la App falle
+// --- LÓGICA DE REINTENTOS PARA DOCKER ---
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    var logger = services.GetRequiredService<ILogger<Program>>();
-    var db = services.GetRequiredService<ApiDbContext>();
-
+    var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     int retries = 10;
+
     while (retries > 0)
     {
         try
         {
-            logger.LogInformation("Verificando conexión con MySQL...");
-            db.Database.EnsureCreated(); // Crea la base de datos y tablas si no existen
-            logger.LogInformation("¡Base de datos conectada con éxito!");
+            db.Database.EnsureCreated();
+            logger.LogInformation(">>> MySQL conectado correctamente.");
             break;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             retries--;
-            logger.LogWarning($"MySQL aún no está listo. Reintentando... ({retries} intentos restantes)");
-            Thread.Sleep(5000); // Espera 5 segundos entre reintentos
+            logger.LogWarning($">>> MySQL no listo. Reintentando... ({retries} intentos)");
+            Thread.Sleep(5000);
         }
     }
 }
