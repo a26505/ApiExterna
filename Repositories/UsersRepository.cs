@@ -3,7 +3,7 @@ using Models;
 
 namespace Repositories;
 
-public class UsersRepository
+public class UsersRepository : IUsersRepository
 {
     private readonly HttpClient _http;
     public UsersRepository(HttpClient http) => _http = http;

@@ -3,13 +3,13 @@ using Models;
 
 namespace Services;
 
-public class SummaryService
+public class SummaryService : ISummaryService
 {
-    private readonly UsersService _users;
-    private readonly TasksService _tasks;
+    private readonly IUsersService _users;
+    private readonly ITasksService _tasks;
     private readonly ApiDbContext _db;
 
-    public SummaryService(UsersService users, TasksService tasks, ApiDbContext db)
+    public SummaryService(IUsersService users, ITasksService tasks, ApiDbContext db)
     {
         _users = users;
         _tasks = tasks;
@@ -24,7 +24,8 @@ public class SummaryService
         _db.Logs.Add(new Log
         {
             Endpoint = "/api/summary",
-            Message = "Summary endpoint called"
+            Message = "Summary endpoint called using Interfaces",
+            CalledAt = DateTime.UtcNow
         });
 
         await _db.SaveChangesAsync();

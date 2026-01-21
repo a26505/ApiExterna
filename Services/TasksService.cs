@@ -4,10 +4,10 @@ using QueryParams;
 
 namespace Services;
 
-public class TasksService
+public class TasksService : ITasksService
 {
-    private readonly TasksRepository _repo;
-    public TasksService(TasksRepository repo) => _repo = repo;
+    private readonly ITasksRepository _repo;
+    public TasksService(ITasksRepository repo) => _repo = repo;
 
     public async Task<List<TaskDto>> GetTasksAsync(TaskQueryParams query)
     {

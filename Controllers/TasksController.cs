@@ -8,8 +8,9 @@ namespace Controllers;
 [Route("api/tasks")]
 public class TasksController : ControllerBase
 {
-    private readonly TasksService _service;
-    public TasksController(TasksService service) => _service = service;
+    private readonly ITasksService _service;
+
+    public TasksController(ITasksService service) => _service = service;
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] TaskQueryParams query)

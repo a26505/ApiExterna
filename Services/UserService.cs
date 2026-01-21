@@ -4,10 +4,10 @@ using QueryParams;
 
 namespace Services;
 
-public class UsersService
+public class UserService : IUsersService
 {
-    private readonly UsersRepository _repo;
-    public UsersService(UsersRepository repo) => _repo = repo;
+    private readonly IUsersRepository _repo;
+    public UserService(IUsersRepository repo) => _repo = repo;
 
     public async Task<List<UserDto>> GetUsersAsync(UserQueryParams query)
     {

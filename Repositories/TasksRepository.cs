@@ -3,7 +3,7 @@ using Models;
 
 namespace Repositories;
 
-public class TasksRepository
+public class TasksRepository : ITasksRepository
 {
     private readonly HttpClient _http;
     public TasksRepository(HttpClient http) => _http = http;

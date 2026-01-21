@@ -7,8 +7,10 @@ namespace Controllers;
 [Route("api/summary")]
 public class SummaryController : ControllerBase
 {
-    private readonly SummaryService _service;
-    public SummaryController(SummaryService service) => _service = service;
+    private readonly ISummaryService _service;
+
+    // Inyectamos la Interfaz, no la clase concreta
+    public SummaryController(ISummaryService service) => _service = service;
 
     [HttpGet]
     public async Task<IActionResult> Get()
