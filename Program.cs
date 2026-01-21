@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Models;
-using Services;
-using Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,21 +7,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// HttpClients (API externa)
-builder.Services.AddHttpClient<UsersRepository>(c =>
-    c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/"));
+// Configuración de MySQL
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddHttpClient<TasksRepository>(c =>
-    c.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/"));
-
-// Services
-builder.Services.AddScoped<UsersService>();
-builder.Services.AddScoped<TasksService>();
-builder.Services.AddScoped<SummaryService>();
-
-// SQL Server
 builder.Services.AddDbContext<ApiDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 var app = builder.Build();
 
@@ -33,14 +21,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.MapControllers();
 
-// Crear DB automáticamente
+// Lógica de inicialización de base de datos robusta
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
-    db.Database.EnsureCreated();
+    var services = scope.ServiceProvider;
+    try 
+    {
+        var db = services.GetRequiredService<ApiDbContext>();
+        // Esperar un poco a que el contenedor de MySQL esté listo
+        Thread.Sleep(5000); 
+        db.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error al crear la DB: {ex.Message}");
+    }
 }
 
 app.Run();

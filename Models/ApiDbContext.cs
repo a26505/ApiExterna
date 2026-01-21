@@ -1,10 +1,10 @@
-using Microsoft.EntityFrameworkCore; 
+using Microsoft.EntityFrameworkCore;
 
-namespace Models; 
+namespace Models;
 
 public class ApiDbContext : DbContext
 {
-    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options) {}
+    public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options) { }
     public DbSet<Log> Logs { get; set; }
 }
 

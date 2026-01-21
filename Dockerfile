@@ -1,15 +1,19 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+# Capa de construcción
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copiar solo el .csproj primero
+# Copiar csproj y restaurar
 COPY *.csproj ./
 RUN dotnet restore
 
-# Copiar todo lo demás
+# Copiar todo y publicar
 COPY . ./
 RUN dotnet publish -c Release -o out
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0
+# Capa de ejecución
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/out .
-ENTRYPOINT ["dotnet","Integra-una-API-externa-usando-Vibe-coding.dll"]
+
+# Asegúrate de que el nombre de la DLL coincida con tu .csproj
+ENTRYPOINT ["dotnet", "Integra-una-API-externa-usando-Vibe-coding.dll"]
