@@ -22,7 +22,7 @@ public class TasksRepository : ITasksRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Error al consumir API de Tareas: {ex.Message}");
+            _logger.LogError($"Error al consumir API externa de Tareas: {ex.Message}");
             return new List<TaskModel>();
         }
     }

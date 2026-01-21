@@ -14,5 +14,9 @@ public class UsersController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] UserQueryParams query)
-        => Ok(await _service.GetUsersAsync(query));
+    {
+        // Si el 'query.Name' es null, el servicio devolverá todos los usuarios automáticamente
+        var users = await _service.GetUsersAsync(query);
+        return Ok(users);
+    }
 }

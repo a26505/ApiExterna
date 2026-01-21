@@ -14,5 +14,9 @@ public class TasksController : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] TaskQueryParams query)
-        => Ok(await _service.GetTasksAsync(query));
+    {
+        // Si 'query.UserId' no tiene valor, el servicio devolverá la lista completa de tareas
+        var tasks = await _service.GetTasksAsync(query);
+        return Ok(tasks);
+    }
 }
