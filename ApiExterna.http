@@ -1,0 +1,6 @@
+@ApiExterna_HostAddress = http://localhost:5087
+
+GET {{ApiExterna_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

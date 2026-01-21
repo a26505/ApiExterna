@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  api:
+    build: .
+    ports:
+      - "5000:80"
+    depends_on:
+      - mysql
+    environment:
+      ConnectionStrings__DefaultConnection: >
+        Server=mysql;
+        Port=3306;
+        Database=apidb;
+        User=root;
+        Password=rootpassword;
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: apidb
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
+
+volumes:
+  mysql_data:
